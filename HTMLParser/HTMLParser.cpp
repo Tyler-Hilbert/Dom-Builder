@@ -5,33 +5,35 @@
 #include <limits>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <stack>
 
 
 using namespace std; 
 
+// Stack of important tags
+class tagsList : public stack<string> {
+public:
+	bool inWritableTag() {
+		return (empty() || top() == "<body");
+	}
+};
 
-void parse(string &parsed, string &line);
-void replaceAll(string& str, const string& from, const string& to);
+
+void parse(string &parsed, string &line, tagsList &tags);
 
 
 int main(int argc, const char** argv) {
-	//ifstream infile("D:\\Documents\\Computer Science\\Cryptology\\decryption.html");
-	ifstream infile("D:\\Documents\\Computer Science\\static-html.txt");
+	ifstream infile("D:\\Documents\\Computer Science\\masonacm.org.htm");
 
 	if (infile) {
 		// Read file
 		string fileData((istreambuf_iterator<char>(infile)), istreambuf_iterator<char>());
 		infile.close();
 
-		// Prepare file to parse
-		//replaceAll(fileData, "\t", "");
-		//replaceAll(fileData, "&nbsp;", "");
-
 		// Parse
 		string parsed = "";
-		bool inBody = false;
-		bool inScript = false;
-		parse(parsed, fileData);
+		tagsList tags;
+		parse(parsed, fileData, tags);
 
 		// Output
 		cout << parsed;
@@ -48,7 +50,7 @@ int main(int argc, const char** argv) {
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &parsed, string &in) {	
+void parse(string &parsed, string &in, tagsList &tags) {	
 	// Check for tag
 	int tagIndex = in.find_first_of('<');
 
@@ -56,9 +58,17 @@ void parse(string &parsed, string &in) {
 		// Add line up to the tag
 		string beforeTag = in.substr(0, tagIndex);
 		boost::algorithm::trim(beforeTag);
-		if (!beforeTag.empty()) {
+		if (!beforeTag.empty() && tags.inWritableTag()) {
 			parsed += beforeTag + "\n";
 		}
+
+		// Add important tag to stack
+		if (boost::iequals(in.substr(tagIndex, 7), "<script"))
+			tags.push("<script");
+		else if (boost::iequals(in.substr(tagIndex, 6), "<style"))
+			tags.push("<style");
+		else if (boost::iequals(in.substr(tagIndex, 5), "<body"))
+			tags.push("<body");
 
 		// Remove tag
 		in = in.substr(tagIndex);
@@ -66,21 +76,21 @@ void parse(string &parsed, string &in) {
 		if (endTagIndex == -1) {
 			return; // TODO: make a better handling
 		}
+
+		// Remove tag from stack
+		if (boost::iequals(in.substr(tagIndex, 8), "</script"))
+			tags.pop();
+		else if (boost::iequals(in.substr(tagIndex, 7), "</style"))
+			tags.pop();
+		else if (boost::iequals(in.substr(tagIndex, 6), "</body"))
+			tags.pop();
+
 		in = in.substr(endTagIndex + 1);
 
+
 		// Continue parsing
-		parse(parsed, in);
+		parse(parsed, in, tags);
 	} 
 }
 
-	
 
-void replaceAll(string& str, const string& from, const string& to) {
-	if (from.empty())
-		return;
-	size_t start_pos = 0;
-	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-		str.replace(start_pos, from.length(), to);
-		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-	}
-}
