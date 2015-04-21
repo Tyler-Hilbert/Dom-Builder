@@ -20,10 +20,11 @@ public:
 
 
 void parse(string &line, tagsList &tags, int &tagIndex);
+void print(string &line);
 
 
 int main(int argc, const char** argv) {
-	ifstream infile("D:\\Documents\\Computer Science\\Web\\masonacm.org.htm");
+	ifstream infile("D:\\Documents\\Computer Science\\Web\\ebay.html");
 
 	if (infile) {
 		// Read file
@@ -57,7 +58,7 @@ void parse(string &in, tagsList &tags, int &tagIndex) {
 	string beforeTag = in.substr(0, tagIndex);
 	boost::algorithm::trim(beforeTag);
 	if (!beforeTag.empty() && tags.inWritableTag()) { 
-		cout << beforeTag + "\n";
+		print(beforeTag);
 	}
 
 	// Add important tag to stack
@@ -85,6 +86,35 @@ void parse(string &in, tagsList &tags, int &tagIndex) {
 
 	// Update in string
 	in = in.substr(endTagIndex + 1);
+}
+
+void print(string &line) {
+	// Decode html entities
+	int tagIndex = line.find_first_of('&');
+	while (tagIndex != -1) {
+		cout << line.substr(0, tagIndex);
+		line.substr(tagIndex);
+
+		if (boost::iequals(line.substr(0, 5), "amp;")) {
+			cout << "&";
+			line = line.substr(4);
+		} else if (boost::iequals(line.substr(tagIndex, 4), "lt;")) {
+			cout << "<";
+			line = line.substr(3);
+		} else if (boost::iequals(line.substr(tagIndex, 4), "gt;")) {
+			cout << ">";
+			line = line.substr(3);
+		} else {
+			line = line.substr(line.find_first_of(';') + 1); // Remove other entities
+		}
+
+		tagIndex = line.find_first_of('&');
+	}
+
+	// Output
+	if (!line.empty()) {
+		cout << line + "\n";
+	}
 }
 
 
