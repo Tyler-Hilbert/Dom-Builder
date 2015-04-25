@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <stack>
+#include "View.h"
 
 
 using namespace std; 
@@ -19,12 +20,12 @@ public:
 };
 
 
-void parse(string &line, tagsList &tags, int &tagIndex);
-void print(string &line);
+void parse(string &line, tagsList &tags, int &tagIndex, string &text);
+void print(string &line, string &text);
 
 
 int main(int argc, const char** argv) {
-	ifstream infile("D:\\Documents\\Computer Science\\Web\\ebay.html");
+	ifstream infile("D:\\Documents\\Computer Science\\Web\\tpb.htm");
 
 	if (infile) {
 		// Read file
@@ -33,12 +34,17 @@ int main(int argc, const char** argv) {
 
 		// Parse
 		tagsList tags;
+		string text;
 		// Check for tag
 		int tagIndex = in.find_first_of('<');
 		do {
-			parse(in, tags, tagIndex);
+			parse(in, tags, tagIndex, text);
 			tagIndex = in.find_first_of('<');
 		} while (tagIndex != -1);
+
+
+		// Display View
+		View view(text);
 
 
 		system("pause");
@@ -53,12 +59,12 @@ int main(int argc, const char** argv) {
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &in, tagsList &tags, int &tagIndex) {	
+void parse(string &in, tagsList &tags, int &tagIndex, string &text) {	
 	// Add line up to the tag
 	string beforeTag = in.substr(0, tagIndex);
 	boost::algorithm::trim(beforeTag);
 	if (!beforeTag.empty() && tags.inWritableTag()) { 
-		print(beforeTag);
+		print(beforeTag, text);
 	}
 
 	// Add important tag to stack
@@ -88,11 +94,10 @@ void parse(string &in, tagsList &tags, int &tagIndex) {
 	in = in.substr(endTagIndex + 1);
 }
 
-void print(string &line) {
+void print(string &line, string &text) {
 	// Decode html entities
 	int tagIndex = line.find_first_of('&');
 	while (tagIndex != -1) {
-		cout << line.substr(0, tagIndex);
 		line.substr(tagIndex);
 
 		if (boost::iequals(line.substr(0, 5), "amp;")) {
@@ -113,7 +118,7 @@ void print(string &line) {
 
 	// Output
 	if (!line.empty()) {
-		cout << line + "\n";
+		text = text + line + "\n";
 	}
 }
 
