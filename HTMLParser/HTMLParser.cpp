@@ -101,13 +101,13 @@ void print(string &line, string &text) {
 		line.substr(tagIndex);
 
 		if (boost::iequals(line.substr(0, 5), "amp;")) {
-			cout << "&";
+			text += "&";
 			line = line.substr(4);
 		} else if (boost::iequals(line.substr(tagIndex, 4), "lt;")) {
-			cout << "<";
+			text += "<";
 			line = line.substr(3);
 		} else if (boost::iequals(line.substr(tagIndex, 4), "gt;")) {
-			cout << ">";
+			text += ">";
 			line = line.substr(3);
 		} else {
 			line = line.substr(line.find_first_of(';') + 1); // Remove other entities

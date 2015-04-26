@@ -17,14 +17,28 @@ View::View(std::string text) {
 	window.draw(displayText);
 	window.display();
 
+	int y = 0;
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+				y -= 100;
+				int textSize = displayText.getLocalBounds().height * -1 + 800;
+				if (y < textSize)
+					y = textSize;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+				y += 100;
+				if (y > 0)
+					y = 0;
+			}
+
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
 
 		window.clear();
+		displayText.setPosition(0, y);
 		window.draw(displayText);
 		window.display();
 	}
