@@ -3,10 +3,11 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <mutex>
 
 class View {
 public:
-	View(std::string text);
+	View(std::string &text, std::mutex &mutex);
 };
 
 #endif

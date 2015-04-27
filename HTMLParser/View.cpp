@@ -3,14 +3,13 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-View::View(std::string text) {
+View::View(std::string &text, std::mutex &mutex) {
 	sf::RenderWindow window(sf::VideoMode(800, 800), "Parsed HTML");
 
 	sf::Font font;
 	font.loadFromFile("arial.ttf");
 	sf::Text displayText;
 	displayText.setFont(font);
-	displayText.setString(text);
 	displayText.setCharacterSize(24);
 	displayText.setColor(sf::Color::White);
 
@@ -39,6 +38,9 @@ View::View(std::string text) {
 
 		window.clear();
 		displayText.setPosition(0, y);
+		mutex.lock();
+		displayText.setString(text);
+		mutex.unlock();
 		window.draw(displayText);
 		window.display();
 	}

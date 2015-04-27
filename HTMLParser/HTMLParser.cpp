@@ -7,6 +7,8 @@
 #include <boost/algorithm/string.hpp>
 #include <stack>
 #include "View.h"
+#include <thread>
+#include <mutex>
 
 
 using namespace std; 
@@ -20,8 +22,9 @@ public:
 };
 
 
-void parse(string &line, tagsList &tags, int &tagIndex, string &text);
-void print(string &line, string &text);
+void parse(string &line, tagsList &tags, int &tagIndex, string &text, mutex &mutex);
+void print(string &line, string &text, mutex &mutex);
+void createGui(string &text, mutex &mutex);
 
 
 int main(int argc, const char** argv) {
@@ -35,17 +38,15 @@ int main(int argc, const char** argv) {
 		// Parse
 		tagsList tags;
 		string text;
+		mutex mutex;
+		thread thread(&createGui, ref(text), ref(mutex));
+		thread.detach();
 		// Check for tag
 		int tagIndex = in.find_first_of('<');
 		do {
-			parse(in, tags, tagIndex, text);
+			parse(in, tags, tagIndex, text, mutex);
 			tagIndex = in.find_first_of('<');
 		} while (tagIndex != -1);
-
-
-		// Display View
-		View view(text);
-
 
 		system("pause");
 		return 0;
@@ -59,12 +60,12 @@ int main(int argc, const char** argv) {
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &in, tagsList &tags, int &tagIndex, string &text) {	
+void parse(string &in, tagsList &tags, int &tagIndex, string &text, mutex &mutex) {	
 	// Add line up to the tag
 	string beforeTag = in.substr(0, tagIndex);
 	boost::algorithm::trim(beforeTag);
 	if (!beforeTag.empty() && tags.inWritableTag()) { 
-		print(beforeTag, text);
+		print(beforeTag, text, mutex);
 	}
 
 	// Add important tag to stack
@@ -94,20 +95,26 @@ void parse(string &in, tagsList &tags, int &tagIndex, string &text) {
 	in = in.substr(endTagIndex + 1);
 }
 
-void print(string &line, string &text) {
+void print(string &line, string &text, mutex &mutex) {
 	// Decode html entities
 	int tagIndex = line.find_first_of('&');
 	while (tagIndex != -1) {
 		line.substr(tagIndex);
 
 		if (boost::iequals(line.substr(0, 5), "amp;")) {
+			mutex.lock();
 			text += "&";
+			mutex.unlock();
 			line = line.substr(4);
 		} else if (boost::iequals(line.substr(tagIndex, 4), "lt;")) {
+			mutex.lock();
 			text += "<";
+			mutex.unlock();
 			line = line.substr(3);
 		} else if (boost::iequals(line.substr(tagIndex, 4), "gt;")) {
+			mutex.lock();
 			text += ">";
+			mutex.unlock();
 			line = line.substr(3);
 		} else {
 			line = line.substr(line.find_first_of(';') + 1); // Remove other entities
@@ -118,8 +125,14 @@ void print(string &line, string &text) {
 
 	// Output
 	if (!line.empty()) {
+		mutex.lock();
 		text = text + line + "\n";
+		mutex.unlock();
 	}
 }
 
+void createGui(string &text, mutex &mutex) {
+	// Display View
+	View view(text, mutex);
+}
 
