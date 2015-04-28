@@ -22,13 +22,13 @@ public:
 };
 
 
-void parse(string &line, tagsList &tags, int &tagIndex, string &text, mutex &mutex);
-void print(string &line, string &text, mutex &mutex);
-void createGui(string &text, mutex &mutex);
-
+void parse(string &line, tagsList &tags, int &tagIndex, string &text, mutex &mutex); // Parses up to tag
+void print(string &line, string &text, mutex &mutex); // Adds parsed html to text string
+void createGui(string &text, mutex &mutex); // Starts the gui thread
+bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
 
 int main(int argc, const char** argv) {
-	ifstream infile("D:\\Documents\\Computer Science\\Web\\tpb.htm");
+	ifstream infile("D:\\Documents\\Computer Science\\Web\\sample.html");
 
 	if (infile) {
 		// Read file
@@ -69,11 +69,11 @@ void parse(string &in, tagsList &tags, int &tagIndex, string &text, mutex &mutex
 	}
 
 	// Add important tag to stack
-	if (boost::iequals(in.substr(tagIndex, 7), "<script"))
+	if (nextTagIs(in, tagIndex, "<script"))
 		tags.push("<script");
-	else if (boost::iequals(in.substr(tagIndex, 6), "<style"))
+	else if (nextTagIs(in, tagIndex, "<style"))
 		tags.push("<style");
-	else if (boost::iequals(in.substr(tagIndex, 5), "<body"))
+	else if (nextTagIs(in, tagIndex, "<body"))
 		tags.push("<body");
 
 	// Remove tag
@@ -84,17 +84,20 @@ void parse(string &in, tagsList &tags, int &tagIndex, string &text, mutex &mutex
 	}
 
 	// Remove tag from stack
-	if (boost::iequals(in.substr(tagIndex, 8), "</script"))
+	if (nextTagIs(in, tagIndex, "</script"))
 		tags.pop();
-	else if (boost::iequals(in.substr(tagIndex, 7), "</style"))
+	else if (nextTagIs(in, tagIndex, "</style"))
 		tags.pop();
-	else if (boost::iequals(in.substr(tagIndex, 6), "</body"))
+	else if (nextTagIs(in, tagIndex, "</body"))
 		tags.pop();
 
 	// Update in string
 	in = in.substr(endTagIndex + 1);
 }
 
+/**
+  *	Adds parsed HTML to the text string
+  */
 void print(string &line, string &text, mutex &mutex) {
 	// Decode html entities
 	int tagIndex = line.find_first_of('&');
@@ -131,8 +134,17 @@ void print(string &line, string &text, mutex &mutex) {
 	}
 }
 
+/**
+  * Creates the view, should be called as a thread
+  */
 void createGui(string &text, mutex &mutex) {
 	// Display View
 	View view(text, mutex);
 }
 
+/**
+  * Checks if the next tag starting at tagIndex is the passed tag
+  */
+bool nextTagIs(string &in, int &tagIndex, string tag) {
+	return (in.length() >= tagIndex + tag.length() && boost::iequals(in.substr(tagIndex, tag.length()), tag));
+}
