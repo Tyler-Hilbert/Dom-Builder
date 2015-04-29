@@ -9,7 +9,7 @@
 #include "View.h"
 #include <thread>
 #include <mutex>
-
+#include "Page.h"
 
 using namespace std; 
 
@@ -28,33 +28,25 @@ void createGui(string &text, mutex &mutex); // Starts the gui thread
 bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
 
 int main(int argc, const char** argv) {
-	ifstream infile("D:\\Documents\\Computer Science\\Web\\sample.html");
+	// Read page
+	Page page;
+	string in = page.getPage("http://httpbin.org/");
 
-	if (infile) {
-		// Read file
-		string in((istreambuf_iterator<char>(infile)), istreambuf_iterator<char>());
-		infile.close();
+	// Parse
+	tagsList tags;
+	string text;
+	mutex mutex;
+	thread thread(&createGui, ref(text), ref(mutex));
+	thread.detach();
+	// Check for tag
+	int tagIndex = in.find_first_of('<');
+	do {
+		parse(in, tags, tagIndex, text, mutex);
+		tagIndex = in.find_first_of('<');
+	} while (tagIndex != -1);
 
-		// Parse
-		tagsList tags;
-		string text;
-		mutex mutex;
-		thread thread(&createGui, ref(text), ref(mutex));
-		thread.detach();
-		// Check for tag
-		int tagIndex = in.find_first_of('<');
-		do {
-			parse(in, tags, tagIndex, text, mutex);
-			tagIndex = in.find_first_of('<');
-		} while (tagIndex != -1);
-
-		system("pause");
-		return 0;
-	} else {
-		cout << "file not found!\n";
-		system("pause");
-		return -1;
-	}
+	system("pause");
+	return 0;
 }
 
 /**
