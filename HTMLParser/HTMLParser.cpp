@@ -28,22 +28,34 @@ void createGui(string &text, mutex &mutex); // Starts the gui thread
 bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
 
 int main(int argc, const char** argv) {
-	// Read page
-	Page page;
-	string in = page.getPage("http://httpbin.org/");
-
-	// Parse
-	tagsList tags;
+	// Create gui thread
 	string text;
 	mutex mutex;
 	thread thread(&createGui, ref(text), ref(mutex));
 	thread.detach();
-	// Check for tag
-	int tagIndex = in.find_first_of('<');
-	do {
-		parse(in, tags, tagIndex, text, mutex);
-		tagIndex = in.find_first_of('<');
-	} while (tagIndex != -1);
+
+	// Read page
+	Page page;
+	string in = page.getPage("http://httpbin.org");
+
+	// Parse the returned page
+	if (in.empty()) {
+		text = "unable to read url";
+	} else {
+		tagsList tags;
+
+		int tagIndex = in.find_first_of('<'); 	// Check for tag
+
+		try {
+			do {
+				parse(in, tags, tagIndex, text, mutex);
+				tagIndex = in.find_first_of('<');
+			} while (tagIndex != -1);
+		}
+		catch (int e) {
+			text = e;
+		}
+	}
 
 	system("pause");
 	return 0;
