@@ -23,9 +23,11 @@ public:
 
 
 void parse(string &line, tagsList &tags, int &tagIndex, string &text, mutex &mutex); // Parses up to tag
-void print(string &line, string &text, mutex &mutex); // Adds parsed html to text string
-void createGui(string &text, mutex &mutex); // Starts the gui thread
 bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
+void print(string &line, string &text, mutex &mutex); // Adds parsed html to text string
+void decodeHTML(string &line); // Decodes the html character entities
+void createGui(string &text, mutex &mutex); // Starts the gui thread
+
 
 int main(int argc, const char** argv) {
 	// Create gui thread
@@ -44,8 +46,8 @@ int main(int argc, const char** argv) {
 	} else {
 		tagsList tags;
 
-		int tagIndex = in.find_first_of('<'); 	// Check for tag
-
+		// Check for and loop through tags
+		int tagIndex = in.find_first_of('<'); 	
 		try {
 			do {
 				parse(in, tags, tagIndex, text, mutex);
@@ -100,41 +102,44 @@ void parse(string &in, tagsList &tags, int &tagIndex, string &text, mutex &mutex
 }
 
 /**
+  * Checks if the next tag starting at tagIndex is the passed tag
+  */
+bool nextTagIs(string &in, int &tagIndex, string tag) {
+	return (in.length() >= tagIndex + tag.length() && boost::iequals(in.substr(tagIndex, tag.length()), tag));
+}
+
+/**
   *	Adds parsed HTML to the text string
   */
 void print(string &line, string &text, mutex &mutex) {
-	// Decode html entities
-	int tagIndex = line.find_first_of('&');
-	while (tagIndex != -1) {
-		line.substr(tagIndex);
-
-		if (boost::iequals(line.substr(0, 5), "amp;")) {
-			mutex.lock();
-			text += "&";
-			mutex.unlock();
-			line = line.substr(4);
-		} else if (boost::iequals(line.substr(tagIndex, 4), "lt;")) {
-			mutex.lock();
-			text += "<";
-			mutex.unlock();
-			line = line.substr(3);
-		} else if (boost::iequals(line.substr(tagIndex, 4), "gt;")) {
-			mutex.lock();
-			text += ">";
-			mutex.unlock();
-			line = line.substr(3);
-		} else {
-			line = line.substr(line.find_first_of(';') + 1); // Remove other entities
-		}
-
-		tagIndex = line.find_first_of('&');
-	}
-
+	decodeHTML(line);
 	// Output
 	if (!line.empty()) {
 		mutex.lock();
 		text = text + line + "\n";
 		mutex.unlock();
+	}
+}
+
+/**
+  * Decodes any character entities
+  */
+void decodeHTML(string &line) {
+	int tagIndex = line.find_first_of('&');
+	while (tagIndex != -1) {
+		if (boost::iequals(line.substr(tagIndex, 5), "&amp;")) {
+			line.erase(tagIndex + 1, 4);
+		} else if (boost::iequals(line.substr(tagIndex, 4), "&lt;")) {
+			line[tagIndex] = '<';
+			line.erase(tagIndex + 1, 3);
+		} else if (boost::iequals(line.substr(tagIndex, 4), "&gt;")) {
+			line[tagIndex] = '>';
+			line.erase(tagIndex + 1, 3);
+		} else {
+			line = line.substr(line.find_first_of(';') + 1); // Remove other entities
+		}
+
+		tagIndex = line.find_first_of('&', tagIndex + 1);
 	}
 }
 
@@ -146,9 +151,4 @@ void createGui(string &text, mutex &mutex) {
 	View view(text, mutex);
 }
 
-/**
-  * Checks if the next tag starting at tagIndex is the passed tag
-  */
-bool nextTagIs(string &in, int &tagIndex, string tag) {
-	return (in.length() >= tagIndex + tag.length() && boost::iequals(in.substr(tagIndex, tag.length()), tag));
-}
+
