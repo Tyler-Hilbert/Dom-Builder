@@ -10,30 +10,29 @@
 #include <thread>
 #include <mutex>
 #include "Page.h"
+#include "Node.h"
+#include "DomTree.h"
 
 using namespace std; 
 
-// Stack of important tags
-class tagsList : public stack<string> {
-public:
-	bool inWritableTag() {
-		return (empty() || top() == "<body");
-	}
-};
 
-
-void parse(string &line, tagsList &tags, int &tagIndex, string &text, mutex &mutex); // Parses up to tag
+void parse(string &line, DomTree &domTree, int &tagIndex, mutex &mutex); // Parses up to tag
 bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
-void print(string &line, string &text, mutex &mutex); // Adds parsed html to text string
+void addNode(string &line, DomTree &domTree, mutex &mutex); // Adds parsed html to text string
 void decodeHTML(string &line); // Decodes the html character entities
-void createGui(string &text, mutex &mutex); // Starts the gui thread
+void createGui(DomTree &domTree, mutex &mutex); // Starts the gui thread
 
+bool writable = false;
 
 int main(int argc, const char** argv) {
+	DomTree domTree;
+	Node root;
+	root.setTag("HTML");
+	domTree.setRoot(root);
+
 	// Create gui thread
-	string text;
 	mutex mutex;
-	thread thread(&createGui, ref(text), ref(mutex));
+	thread thread(&createGui, ref(domTree), ref(mutex));
 	thread.detach();
 
 	// Read page
@@ -42,20 +41,18 @@ int main(int argc, const char** argv) {
 
 	// Parse the returned page
 	if (in.empty()) {
-		text = "unable to read url";
+		// ToDO: add error handling here
 	} else {
-		tagsList tags;
-
 		// Check for and loop through tags
 		int tagIndex = in.find_first_of('<'); 	
 		try {
 			do {
-				parse(in, tags, tagIndex, text, mutex);
+				parse(in, domTree, tagIndex, mutex);
 				tagIndex = in.find_first_of('<');
 			} while (tagIndex != -1);
 		}
 		catch (int e) {
-			text = e;
+			// TODO:: Improve handling
 		}
 	}
 
@@ -66,21 +63,21 @@ int main(int argc, const char** argv) {
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &in, tagsList &tags, int &tagIndex, string &text, mutex &mutex) {	
+void parse(string &in, DomTree &domTree, int &tagIndex,  mutex &mutex) {	
 	// Add line up to the tag
 	string beforeTag = in.substr(0, tagIndex);
 	boost::algorithm::trim(beforeTag);
-	if (!beforeTag.empty() && tags.inWritableTag()) { 
-		print(beforeTag, text, mutex);
+	if (!beforeTag.empty() && writable) { 
+		addNode(beforeTag, domTree, mutex);
 	}
 
-	// Add important tag to stack
+	// Set if the element is inside a writable element
 	if (nextTagIs(in, tagIndex, "<script"))
-		tags.push("<script");
+		writable = false;
 	else if (nextTagIs(in, tagIndex, "<style"))
-		tags.push("<style");
+		writable = false;
 	else if (nextTagIs(in, tagIndex, "<body"))
-		tags.push("<body");
+		writable = true;
 
 	// Remove tag
 	in = in.substr(tagIndex);
@@ -89,13 +86,13 @@ void parse(string &in, tagsList &tags, int &tagIndex, string &text, mutex &mutex
 		return; // TODO: make a better handling
 	}
 
-	// Remove tag from stack
+	// Set if the element is inside a writable element
 	if (nextTagIs(in, tagIndex, "</script"))
-		tags.pop();
+		writable = true;
 	else if (nextTagIs(in, tagIndex, "</style"))
-		tags.pop();
+		writable = true;
 	else if (nextTagIs(in, tagIndex, "</body"))
-		tags.pop();
+		writable = false;
 
 	// Update in string
 	in = in.substr(endTagIndex + 1);
@@ -109,14 +106,17 @@ bool nextTagIs(string &in, int &tagIndex, string tag) {
 }
 
 /**
-  *	Adds parsed HTML to the text string
+  *	Adds parsed HTML to the DOMTree
   */
-void print(string &line, string &text, mutex &mutex) {
+void addNode(string &line, DomTree &domTree, mutex &mutex) {
 	decodeHTML(line);
 	// Output
 	if (!line.empty()) {
 		mutex.lock();
-		text = text + line + "\n";
+		Node node;
+		node.setTag("Test"); // TODO: Fix this
+		node.setContent(line);
+		domTree.addNode(node);
 		mutex.unlock();
 	}
 }
@@ -146,9 +146,9 @@ void decodeHTML(string &line) {
 /**
   * Creates the view, should be called as a thread
   */
-void createGui(string &text, mutex &mutex) {
+void createGui(DomTree &domTree, mutex &mutex) {
 	// Display View
-	View view(text, mutex);
+	View view(domTree, mutex);
 }
 
 

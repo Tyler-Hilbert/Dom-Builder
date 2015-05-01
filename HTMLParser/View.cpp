@@ -6,7 +6,7 @@
 /**
   * The main view that shows all the parsed html
   */
-View::View(std::string &text, std::mutex &mutex) {
+View::View(DomTree &domTree, std::mutex &mutex) {
 	sf::RenderWindow window(sf::VideoMode(800, 800), "Parsed HTML");
 	window.setFramerateLimit(30);
 
@@ -49,6 +49,10 @@ View::View(std::string &text, std::mutex &mutex) {
 		window.clear(sf::Color::White);
 		displayText.setPosition(0, y);
 		mutex.lock();
+		string text;
+		for (Node child : domTree.getRoot().getChildren()) {
+			text += child.getContent() + "\n";
+		}
 		displayText.setString(text);
 		mutex.unlock();
 		window.draw(displayText);

@@ -2,12 +2,12 @@
 #define VIEW_H
 
 #include <SFML/Graphics.hpp>
-#include <string>
 #include <mutex>
+#include "DomTree.h"
 
 class View {
 public:
-	View(std::string &text, std::mutex &mutex);
+	View(DomTree &domTree, std::mutex &mutex);
 };
 
 #endif
