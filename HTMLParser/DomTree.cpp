@@ -11,3 +11,7 @@ void DomTree::addNode(Node node) {
 Node& DomTree::getRoot() {
 	return root;
 }
+
+bool DomTree::hasRoot() {
+	return !root.getTag().empty();
+}

@@ -10,6 +10,7 @@ private:
 public:
 	void DomTree::setRoot(Node root);
 	Node& DomTree::getRoot();
+	bool DomTree::hasRoot();
 
 	void DomTree::addNode(Node node);
 };

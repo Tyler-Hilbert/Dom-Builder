@@ -16,7 +16,7 @@
 using namespace std; 
 
 
-void parse(string &line, DomTree &domTree, int &tagIndex, mutex &mutex); // Parses up to tag
+void parse(string &line, DomTree &domTree, mutex &mutex); // Parses up to tag
 bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
 void addNode(string &line, DomTree &domTree, mutex &mutex); // Adds parsed html to text string
 void decodeHTML(string &line); // Decodes the html character entities
@@ -26,9 +26,6 @@ bool writable = false;
 
 int main(int argc, const char** argv) {
 	DomTree domTree;
-	Node root;
-	root.setTag("HTML");
-	domTree.setRoot(root);
 
 	// Create gui thread
 	mutex mutex;
@@ -47,7 +44,8 @@ int main(int argc, const char** argv) {
 		int tagIndex = in.find_first_of('<'); 	
 		try {
 			do {
-				parse(in, domTree, tagIndex, mutex);
+				in = in.substr(tagIndex + 1);
+				parse(in, domTree, mutex);
 				tagIndex = in.find_first_of('<');
 			} while (tagIndex != -1);
 		}
@@ -63,39 +61,28 @@ int main(int argc, const char** argv) {
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &in, DomTree &domTree, int &tagIndex,  mutex &mutex) {	
-	// Add line up to the tag
-	string beforeTag = in.substr(0, tagIndex);
-	boost::algorithm::trim(beforeTag);
-	if (!beforeTag.empty() && writable) { 
-		addNode(beforeTag, domTree, mutex);
-	}
-
-	// Set if the element is inside a writable element
-	if (nextTagIs(in, tagIndex, "<script"))
-		writable = false;
-	else if (nextTagIs(in, tagIndex, "<style"))
-		writable = false;
-	else if (nextTagIs(in, tagIndex, "<body"))
-		writable = true;
-
-	// Remove tag
-	in = in.substr(tagIndex);
+void parse(string &in, DomTree &domTree, mutex &mutex) {
+	// Get tag
 	int endTagIndex = in.find_first_of('>');
-	if (endTagIndex == -1) {
-		return; // TODO: make a better handling
+	int attributeStart = in.find_first_of(' ');
+	Node node;
+	// Check if tag has attributes
+	if (attributeStart != -1 && attributeStart < endTagIndex) {
+		node.setTag(in.substr(0, attributeStart));
+	} else {
+		node.setTag(in.substr(0, endTagIndex));
+	}
+	
+	// Check for dom root
+	if (boost::iequals(node.getTag(), "html")) { // TODO: HTML tag class
+		domTree.setRoot(node); // Add root
+	} else if (domTree.hasRoot()) {
+		domTree.addNode(node); // Add node
+	} else {
+		// Is doctype
 	}
 
-	// Set if the element is inside a writable element
-	if (nextTagIs(in, tagIndex, "</script"))
-		writable = true;
-	else if (nextTagIs(in, tagIndex, "</style"))
-		writable = true;
-	else if (nextTagIs(in, tagIndex, "</body"))
-		writable = false;
-
-	// Update in string
-	in = in.substr(endTagIndex + 1);
+	in = in.substr(endTagIndex);
 }
 
 /**
