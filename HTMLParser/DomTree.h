@@ -15,7 +15,7 @@ public:
 
 
 	void DomTree::addNode(Node node);
-	void DomTree::closeNode();
+	void DomTree::closeNode(string &tag);
 };
 
 #endif
