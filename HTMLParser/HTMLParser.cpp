@@ -27,10 +27,19 @@ bool writable = false;
 int main(int argc, const char** argv) {
 	DomTree domTree;
 
+
 	// Create gui thread
 	mutex mutex;
 	thread thread(&createGui, ref(domTree), ref(mutex));
 	thread.detach();
+
+
+	Node root;
+	root.setTag("root");
+	mutex.lock();
+	domTree.setRoot(root);
+	mutex.unlock();
+
 
 	// Read page
 	Page page;
@@ -72,15 +81,8 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 	} else {
 		node.setTag(in.substr(0, endTagIndex));
 	}
-	
-	// Check for dom root
-	if (boost::iequals(node.getTag(), "html")) { // TODO: HTML tag class
-		domTree.setRoot(node); // Add root
-	} else if (domTree.hasRoot()) {
-		domTree.addNode(node); // Add node
-	} else {
-		// Is doctype
-	}
+
+	domTree.addNode(node);
 
 	in = in.substr(endTagIndex);
 }

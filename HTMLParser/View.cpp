@@ -19,9 +19,6 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 	displayText.setCharacterSize(24);
 	displayText.setColor(sf::Color::Black);
 
-	window.draw(displayText);
-	window.display();
-
 	int y = 0; // The location on the page that is shown.
 	while (window.isOpen()) {
 		sf::Event event;
@@ -49,12 +46,15 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 		// Refresh the view
 		window.clear(sf::Color::White);
 		displayText.setPosition(0, y);
+
+		string output = "";
 		mutex.lock();
-		string output;
 		displayElement(domTree.getRoot(), output);
-		displayText.setString(output);
 		mutex.unlock();
+
+		displayText.setString(output);
 		window.draw(displayText);
+		
 		window.display();
 	}
 }

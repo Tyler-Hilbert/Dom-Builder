@@ -41,3 +41,21 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.exe
+Debug/HTMLParser.ilk
+*.pdb
+HTMLParser.opensdf
+*.sln
+HTMLParser.sdf
+*.log
+HTMLParser/Debug/HTMLParser.obj
+*.tlog
+*.idb
+HTMLParser/Debug/View.obj
+*.vcxproj
+HTMLParser/HTMLParser.vcxproj.filters
+*.user
+*.suo
+*.dll
+*.txt
+*.obj
