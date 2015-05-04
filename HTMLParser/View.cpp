@@ -49,7 +49,7 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 
 		string output = "";
 		mutex.lock();
-		displayElement(domTree.getRoot(), output);
+		displayElement(domTree.getRoot(), output, 0);
 		mutex.unlock();
 
 		displayText.setString(output);
@@ -59,11 +59,16 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 	}
 }
 
-void View::displayElement(Node &node, string &output) {
+void View::displayElement(Node &node, string &output, int tabs) {
+	for (int i = 0; i < tabs; i++) {
+		output += "\t";
+	}
+	tabs++;
+
 	output += node.getTag() + "\n";
 
 	for (int i = 0; i < node.getChildren().size(); i++) {
-		displayElement(node.getChildren().at(i), output);
+		displayElement(node.getChildren().at(i), output, tabs);
 	}
 
 	/*for (Node child : node.getChildren()) {

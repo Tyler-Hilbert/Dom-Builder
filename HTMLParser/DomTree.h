@@ -7,12 +7,15 @@
 class DomTree {
 private:
 	Node root;
+	Node *current;
 public:
 	void DomTree::setRoot(Node root);
 	Node& DomTree::getRoot();
 	bool DomTree::hasRoot();
 
+
 	void DomTree::addNode(Node node);
+	void DomTree::closeNode();
 };
 
 #endif

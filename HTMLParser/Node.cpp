@@ -3,6 +3,14 @@
 
 using namespace std;
 
+void Node::setParent(Node *parent) {
+	this->parent = parent;
+}
+
+Node* Node::getParent() {
+	return parent;
+}
+
 void Node::setTag(string tag) {
 	this->tag = tag;
 }
@@ -23,6 +31,8 @@ vector<Node> &Node::getChildren() {
 	return this->children;
 }
 
-void Node::addChild(Node node) {
+Node* Node::addChild(Node node) {
 	this->children.push_back(node);
+	Node n = this->children.back();
+	return &this->children.back();
 }

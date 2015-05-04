@@ -76,17 +76,25 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 	// Get tag
 	int endTagIndex = in.find_first_of('>');
 	int attributeStart = in.find_first_of(' ');
-	Node node;
-	// Check if tag has attributes
-	if (attributeStart != -1 && attributeStart < endTagIndex) {
-		node.setTag(in.substr(0, attributeStart));
-	} else {
-		node.setTag(in.substr(0, endTagIndex));
-	}
 
-	mutex.lock();
-	domTree.addNode(node);
-	mutex.unlock();
+	// Check if opening or closing tag
+	if (in.at(0) == '/'){
+		mutex.lock();
+		domTree.closeNode();
+		mutex.unlock();
+	} else {
+		Node node;
+		// Check if tag has attributes
+		if (attributeStart != -1 && attributeStart < endTagIndex) {
+			node.setTag(in.substr(0, attributeStart));
+		} else {
+			node.setTag(in.substr(0, endTagIndex));
+		}
+
+		mutex.lock();
+		domTree.addNode(node);
+		mutex.unlock();
+	}
 
 	in = in.substr(endTagIndex);
 }

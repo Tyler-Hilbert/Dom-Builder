@@ -11,7 +11,11 @@ private:
 	vector<Node> children;
 	string tag;
 	string content;
+	Node *parent;
 public:
+	void Node::setParent(Node *parent);
+	Node* Node::getParent();
+	
 	string& Node::getTag();
 	void Node::setTag(string tag);
 
@@ -19,7 +23,7 @@ public:
 	string& Node::getContent();
 
 	vector<Node>& Node::getChildren();
-	void Node::addChild(Node child);
+	Node* Node::addChild(Node child);
 };
 
 #endif
