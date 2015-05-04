@@ -61,8 +61,13 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 
 void View::displayElement(Node &node, string &output) {
 	output += node.getTag() + "\n";
-	for (Node child : node.getChildren()) {
-		displayElement(child, output);
+
+	for (int i = 0; i < node.getChildren().size(); i++) {
+		displayElement(node.getChildren().at(i), output);
 	}
+
+	/*for (Node child : node.getChildren()) {
+		displayElement(child, output);
+	}*/
 	
 }
