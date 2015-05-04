@@ -17,29 +17,28 @@ using namespace std;
 
 
 void parse(string &line, DomTree &domTree, mutex &mutex); // Parses up to tag
-bool nextTagIs(string &in, int &tagIndex, string tag); // Checks if the tag at the given index is the passed tag
-void addNode(string &line, DomTree &domTree, mutex &mutex); // Adds parsed html to text string
 void decodeHTML(string &line); // Decodes the html character entities
 void createGui(DomTree &domTree, mutex &mutex); // Starts the gui thread
 
 bool writable = false;
 
 int main(int argc, const char** argv) {
-	DomTree domTree;
-
-
-	// Create gui thread
 	mutex mutex;
-	thread thread(&createGui, ref(domTree), ref(mutex));
-	thread.detach();
-
-
+	DomTree domTree;
 	Node root;
 	root.setTag("root");
 	mutex.lock();
 	domTree.setRoot(root);
 	mutex.unlock();
 
+	cout << "test 1\n";
+
+	// Create gui thread
+	
+	thread thread(&createGui, ref(domTree), ref(mutex));
+	thread.detach();
+
+	cout << "test 2\n";
 
 	// Read page
 	Page page;
@@ -63,6 +62,9 @@ int main(int argc, const char** argv) {
 		}
 	}
 
+
+	cout << "test 3\n";
+
 	system("pause");
 	return 0;
 }
@@ -82,33 +84,13 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 		node.setTag(in.substr(0, endTagIndex));
 	}
 
+	mutex.lock();
 	domTree.addNode(node);
+	mutex.unlock();
 
 	in = in.substr(endTagIndex);
 }
 
-/**
-  * Checks if the next tag starting at tagIndex is the passed tag
-  */
-bool nextTagIs(string &in, int &tagIndex, string tag) {
-	return (in.length() >= tagIndex + tag.length() && boost::iequals(in.substr(tagIndex, tag.length()), tag));
-}
-
-/**
-  *	Adds parsed HTML to the DOMTree
-  */
-void addNode(string &line, DomTree &domTree, mutex &mutex) {
-	decodeHTML(line);
-	// Output
-	if (!line.empty()) {
-		mutex.lock();
-		Node node;
-		node.setTag("Test"); // TODO: Fix this
-		node.setContent(line);
-		domTree.addNode(node);
-		mutex.unlock();
-	}
-}
 
 /**
   * Decodes any character entities
