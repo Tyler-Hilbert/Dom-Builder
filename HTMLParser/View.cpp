@@ -65,7 +65,7 @@ void View::displayElement(Node &node, string &output, int tabs) {
 	}
 	tabs++;
 
-	output += node.getTag() + "\n";
+	output += node.getTag() + ":" + node.getContent() + "\n";
 
 	for (int i = 0; i < node.getChildren().size(); i++) {
 		displayElement(node.getChildren().at(i), output, tabs);

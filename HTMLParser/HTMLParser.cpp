@@ -20,7 +20,6 @@ void parse(string &line, DomTree &domTree, mutex &mutex); // Parses up to tag
 void decodeHTML(string &line); // Decodes the html character entities
 void createGui(DomTree &domTree, mutex &mutex); // Starts the gui thread
 
-bool writable = false;
 
 int main(int argc, const char** argv) {
 	mutex mutex;
@@ -31,18 +30,14 @@ int main(int argc, const char** argv) {
 	domTree.setRoot(root);
 	mutex.unlock();
 
-	cout << "test 1\n";
-
 	// Create gui thread
-	
 	thread thread(&createGui, ref(domTree), ref(mutex));
 	thread.detach();
 
-	cout << "test 2\n";
-
 	// Read page
 	Page page;
-	string in = page.getPage("http://httpbin.org");
+	//string in = page.getPage("http://www.internet-guide.co.uk/");
+	string in = page.getPage("http://masonacm.org");
 
 	// Parse the returned page
 	if (in.empty()) {
@@ -61,9 +56,6 @@ int main(int argc, const char** argv) {
 			// TODO:: Improve handling
 		}
 	}
-
-
-	cout << "test 3\n";
 
 	system("pause");
 	return 0;
@@ -92,6 +84,14 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 	} else {
 		Node node;
 		node.setTag(tag);
+
+		// Get content for tag
+		int nextTag = in.find_first_of('<', endTagIndex);
+		if (nextTag != -1) {
+			string content = in.substr(endTagIndex + 1, nextTag - endTagIndex - 1);
+			decodeHTML(content);
+			node.setContent(content);
+		}
 		mutex.lock();
 		domTree.addNode(node);
 		mutex.unlock();
@@ -120,6 +120,14 @@ void decodeHTML(string &line) {
 		}
 
 		tagIndex = line.find_first_of('&', tagIndex + 1);
+	}
+
+
+	// Remove \r....
+	// TODO: This should be replaced with something better
+	int index;
+	while ((index = line.find("\r")) != -1) {
+		line.erase(index, 2);
 	}
 }
 
