@@ -3,6 +3,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+
 /**
   * The main view that shows all the parsed html
   */
@@ -49,13 +50,19 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 		window.clear(sf::Color::White);
 		displayText.setPosition(0, y);
 		mutex.lock();
-		string text;
-		for (Node child : domTree.getRoot().getChildren()) {
-			text += child.getContent() + "\n";
-		}
-		displayText.setString(text);
+		string output;
+		displayElement(domTree.getRoot(), output);
+		displayText.setString(output);
 		mutex.unlock();
 		window.draw(displayText);
 		window.display();
 	}
+}
+
+void View::displayElement(Node &node, string &output) {
+	output += node.getTag() + "\n";
+	for (Node child : node.getChildren()) {
+		displayElement(child, output);
+	}
+	
 }

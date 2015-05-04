@@ -4,8 +4,11 @@
 #include <SFML/Graphics.hpp>
 #include <mutex>
 #include "DomTree.h"
+#include "Node.h"
 
 class View {
+private:
+	void View::displayElement(Node &node, string &output);
 public:
 	View(DomTree &domTree, std::mutex &mutex);
 };
