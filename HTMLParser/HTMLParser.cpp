@@ -4,7 +4,6 @@
 #include <vector>
 #include <limits>
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <stack>
 #include "View.h"
 #include <thread>
@@ -107,12 +106,12 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 void decodeHTML(string &line) {
 	int tagIndex = line.find_first_of('&');
 	while (tagIndex != -1) {
-		if (boost::iequals(line.substr(tagIndex, 5), "&amp;")) {
+		if (line.substr(tagIndex, 5).compare("&amp;") == 0) { // Verfiy this is correct
 			line.erase(tagIndex + 1, 4);
-		} else if (boost::iequals(line.substr(tagIndex, 4), "&lt;")) {
+		} else if (line.substr(tagIndex, 4).compare("&lt;") == 0 ) { // verify this
 			line[tagIndex] = '<';
 			line.erase(tagIndex + 1, 3);
-		} else if (boost::iequals(line.substr(tagIndex, 4), "&gt;")) {
+		} else if (line.substr(tagIndex, 4).compare("&gt;") == 0) {
 			line[tagIndex] = '>';
 			line.erase(tagIndex + 1, 3);
 		} else {

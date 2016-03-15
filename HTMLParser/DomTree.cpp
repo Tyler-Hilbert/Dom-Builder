@@ -1,5 +1,4 @@
 #include "DomTree.h"
-#include <boost/algorithm/string.hpp>
 
 void DomTree::setRoot(Node root) {
 	this->root = root;
@@ -15,7 +14,7 @@ void DomTree::closeNode(string &tag) {
 	// TODO: add error handling for bad html closing tag
 	bool found = false;
 	do {
-		if (boost::iequals(current->getTag(), tag)) {
+		if (current->getTag().compare(tag) == 0) { // Verify this works
 			found = true;
 		}
 		current = current->getParent();
