@@ -13,7 +13,7 @@ View::View(DomTree &domTree, std::mutex &mutex) {
 
 	// Set attributes
 	sf::Font font;
-	font.loadFromFile("arial.ttf");
+	font.loadFromFile("resources/fonts/arial.ttf");
 	sf::Text displayText;
 	displayText.setFont(font);
 	displayText.setCharacterSize(24);
