@@ -11,6 +11,7 @@
 #include "Page.h"
 #include "Node.h"
 #include "DomTree.h"
+#include "FileReader.h"
 
 using namespace std; 
 
@@ -34,9 +35,11 @@ int main(int argc, const char** argv) {
 	thread.detach();
 
 	// Read page
-	Page page;
-	//string in = page.getPage("http://www.internet-guide.co.uk/");
-	string in = page.getPage("http://masonacm.org");
+	FileReader reader;
+	string path = "resources/characters.html";
+	string in = reader.getFile(path);
+	
+
 
 	// Parse the returned page
 	if (in.empty()) {
