@@ -13,17 +13,17 @@ private:
 	string content;
 	Node *parent;
 public:
-	void Node::setParent(Node *parent);
-	Node* Node::getParent();
-	
-	string& Node::getTag();
-	void Node::setTag(string tag);
+	void setParent(Node *parent);
+	Node* getParent();
 
-	void Node::setContent(string tag);
-	string& Node::getContent();
+	string& getTag();
+	void setTag(string tag);
 
-	vector<Node>& Node::getChildren();
-	Node* Node::addChild(Node child);
+	void setContent(string tag);
+	string& getContent();
+
+	vector<Node>& getChildren();
+	Node* addChild(Node child);
 };
 
 #endif

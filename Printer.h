@@ -1,14 +1,14 @@
-#ifndef VIEW_H
-#define VIEW_H
+#ifndef PRINTER_H
+#define PRINTER_H
 
 #include "DomTree.h"
 #include "Node.h"
 
-class View {
+class Printer {
 private:
-	void Printer::displayElement(Node &node, string &output, int tabs);
+	void displayElement(Node &node, int tabs);
 public:
-	Printer::print(DomTree &domTree);
+	void print(DomTree &domTree);
 };
 
 #endif

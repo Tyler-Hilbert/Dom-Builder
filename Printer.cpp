@@ -1,13 +1,12 @@
+#include "Printer.h"
 #include <string>
 #include <iostream>
 
 void Printer::print(DomTree &domTree) {
-	displayElement(domTree.getRoot(), output, 0);
-	displayText.setString(output);
-
+	displayElement(domTree.getRoot(), 0);
 }
 
-void Printer::displayElement(Node &node, string &output, int tabs) {
+void Printer::displayElement(Node &node, int tabs) {
 	for (int i = 0; i < tabs; i++) {
 		cout << "\t";
 	}
@@ -16,6 +15,6 @@ void Printer::displayElement(Node &node, string &output, int tabs) {
 	cout << node.getTag() << ":" << node.getContent() << "\n";
 
 	for (int i = 0; i < node.getChildren().size(); i++) {
-		displayElement(node.getChildren().at(i), output, tabs);
+		displayElement(node.getChildren().at(i), tabs);
 	}
 }

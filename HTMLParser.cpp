@@ -7,11 +7,10 @@
 #include <stack>
 #include <thread>
 #include <mutex>
-#include "Page.h"
 #include "Node.h"
 #include "DomTree.h"
 #include "FileReader.h"
-#include "Printer"
+#include "Printer.h"
 
 using namespace std; 
 
@@ -56,7 +55,8 @@ int main(int argc, const char** argv) {
 		}
 	}
 
-	Printer printer(domTree);
+	Printer printer;
+	printer.print(domTree);
 
 	system("pause");
 	return 0;

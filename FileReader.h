@@ -7,6 +7,6 @@ using namespace std;
 
 class FileReader {
 public:
-	string FileReader::getFile(string &path);
+	string getFile(string &path);
 };
 #endif

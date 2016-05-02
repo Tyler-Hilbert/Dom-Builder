@@ -9,13 +9,13 @@ private:
 	Node root;
 	Node *current;
 public:
-	void DomTree::setRoot(Node root);
-	Node& DomTree::getRoot();
-	bool DomTree::hasRoot();
+	void setRoot(Node root);
+	Node& getRoot();
+	bool hasRoot();
 
 
-	void DomTree::addNode(Node node);
-	void DomTree::closeNode(string &tag);
+	void addNode(Node node);
+	void closeNode(string &tag);
 };
 
 #endif
