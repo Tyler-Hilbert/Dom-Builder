@@ -10,7 +10,7 @@
 #include "Node.h"
 #include "DomTree.h"
 #include "FileReader.h"
-#include "Printer.h"
+#include "DirBuilder.h"
 
 using namespace std; 
 
@@ -55,8 +55,8 @@ int main(int argc, const char** argv) {
 		}
 	}
 
-	Printer printer;
-	printer.print(domTree);
+	DirBuilder builder;
+	builder.create(domTree);
 
 	return 0;
 }
