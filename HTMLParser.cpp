@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <stack>
 #include <thread>
-#include <mutex>
 #include "Node.h"
 #include "DomTree.h"
 #include "FileReader.h"
@@ -15,19 +14,16 @@
 using namespace std; 
 
 
-void parse(string &line, DomTree &domTree, mutex &mutex); // Parses up to tag
+void parse(string &line, DomTree &domTree); // Parses up to tag
 void decodeHTML(string &line); // Decodes the html character entities
-void createGui(DomTree &domTree, mutex &mutex); // Starts the gui thread
+void createGui(DomTree &domTree); // Starts the gui thread
 
 
 int main(int argc, const char** argv) {
-	mutex mutex;
 	DomTree domTree;
 	Node root;
 	root.setTag("root");
-	mutex.lock();
 	domTree.setRoot(root);
-	mutex.unlock();
 
 
 	// Read page
@@ -46,7 +42,7 @@ int main(int argc, const char** argv) {
 		try {
 			do {
 				in = in.substr(tagIndex + 1);
-				parse(in, domTree, mutex);
+				parse(in, domTree);
 				tagIndex = in.find_first_of('<');
 			} while (tagIndex != -1);
 		}
@@ -64,7 +60,7 @@ int main(int argc, const char** argv) {
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &in, DomTree &domTree, mutex &mutex) {
+void parse(string &in, DomTree &domTree) {
 	// Get tag
 	string tag;
 	int endTagIndex = in.find_first_of('>');
@@ -78,9 +74,7 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 	// Check if opening or closing tag
 	if (in.at(0) == '/'){
 		tag = tag.substr(1);
-		mutex.lock();
 		domTree.closeNode(tag);
-		mutex.unlock();
 	} else {
 		Node node;
 		node.setTag(tag);
@@ -92,9 +86,7 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 			decodeHTML(content);
 			node.setContent(content);
 		}
-		mutex.lock();
 		domTree.addNode(node);
-		mutex.unlock();
 	}
 
 	in = in.substr(endTagIndex);
