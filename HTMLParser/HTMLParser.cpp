@@ -5,13 +5,13 @@
 #include <limits>
 #include <algorithm>
 #include <stack>
-#include "View.h"
 #include <thread>
 #include <mutex>
 #include "Page.h"
 #include "Node.h"
 #include "DomTree.h"
 #include "FileReader.h"
+#include "Printer"
 
 using namespace std; 
 
@@ -30,15 +30,12 @@ int main(int argc, const char** argv) {
 	domTree.setRoot(root);
 	mutex.unlock();
 
-	// Create gui thread
-	thread thread(&createGui, ref(domTree), ref(mutex));
-	thread.detach();
 
 	// Read page
 	FileReader reader;
 	string path = "resources/characters.html";
 	string in = reader.getFile(path);
-	
+
 
 
 	// Parse the returned page
@@ -58,6 +55,8 @@ int main(int argc, const char** argv) {
 			// TODO:: Improve handling
 		}
 	}
+
+	Printer printer(domTree);
 
 	system("pause");
 	return 0;
@@ -132,13 +131,4 @@ void decodeHTML(string &line) {
 		line.erase(index, 2);
 	}
 }
-
-/**
-  * Creates the view, should be called as a thread
-  */
-void createGui(DomTree &domTree, mutex &mutex) {
-	// Display View
-	View view(domTree, mutex);
-}
-
 
