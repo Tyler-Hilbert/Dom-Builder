@@ -58,7 +58,6 @@ int main(int argc, const char** argv) {
 	Printer printer;
 	printer.print(domTree);
 
-	system("pause");
 	return 0;
 }
 
