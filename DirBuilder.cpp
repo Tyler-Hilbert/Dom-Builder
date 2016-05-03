@@ -1,5 +1,4 @@
 #include "DirBuilder.h"
-#include <string>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,10 +33,19 @@ void DirBuilder::parseElement(Node &node, int tabs) {
 		// Create directory
 		const char * cmd = command.c_str();
 		system (cmd);
+
+		// Set character name in directory builder
+		m_character = charName;
 	}
+	// TODO: Check for /li to close characters name
 
 
+	//if (node.getTag().compare("div class=\"SpoilerTarget bbCodeSpoilerText\"") == 0) {
+//		cout << "Fire";
+//	}	 
 
+
+	// Uncomment this to print dom to the console
 	for (int i = 0; i < tabs; i++) {
 		cout << "\t";
 	}
