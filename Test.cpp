@@ -33,6 +33,9 @@ int main(int argc, const char** argv) {
 	printResult(domTree.getRoot().getChildren().at(0).getTag().compare("HTML") == 0, 1);
 	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(0).getChildren().at(0).getTag().compare("TITLE") == 0, 2);
 	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(0).getChildren().at(0).getContent().compare("Your Title Here") == 0, 3);
+	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(1).getChildren().at(0).getChildren().at(2).getContent().compare("second") == 0, 4);
+	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(1).getChildren().at(0).getContent().compare("third") == 0, 5);
+	cout << domTree.getRoot().getChildren().at(0).getChildren().at(1).getChildren().at(0).getContent();
 
 
 	return 0;
