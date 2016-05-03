@@ -31,6 +31,9 @@ int main(int argc, const char** argv) {
 	domBuilder.populateDomTreeFromString(domTree, in);
 
 	printResult(domTree.getRoot().getChildren().at(0).getTag().compare("HTML") == 0, 1);
+	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(0).getChildren().at(0).getTag().compare("TITLE") == 0, 2);
+	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(0).getChildren().at(0).getContent().compare("Your Title Here") == 0, 3);
+
 
 	return 0;
 }
