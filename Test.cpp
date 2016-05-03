@@ -17,7 +17,7 @@ int main(int argc, const char** argv) {
 
 	// Read page
 	FileReader reader;
-	string path = "resources/test/basic.html";
+	string path = "resources/tests/basic.html"; // TODO: Add error handeling here for empty file
 	string in = reader.getFile(path);
 
 	// Create DomTree
@@ -30,7 +30,7 @@ int main(int argc, const char** argv) {
 	DomTreeBuilder domBuilder;
 	domBuilder.populateDomTreeFromString(domTree, in);
 
-	printResult(root.getChildren().at(0).getTag().compare("HTML") == 0, 1);
+	printResult(domTree.getRoot().getChildren().at(0).getTag().compare("HTML") == 0, 1);
 
 	return 0;
 }
