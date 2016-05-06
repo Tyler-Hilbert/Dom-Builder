@@ -30,12 +30,18 @@ int main(int argc, const char** argv) {
 	DomTreeBuilder domBuilder;
 	domBuilder.populateDomTreeFromString(domTree, in);
 
-	printResult(domTree.getRoot().getChildren().at(0).getTag().compare("HTML") == 0, 1);
-	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(0).getChildren().at(0).getTag().compare("TITLE") == 0, 2);
-	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(0).getChildren().at(0).getContent().compare("Your Title Here") == 0, 3);
-	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(1).getChildren().at(0).getChildren().at(2).getContent().compare("second") == 0, 4);
-	printResult(domTree.getRoot().getChildren().at(0).getChildren().at(1).getChildren().at(0).getContent().compare("third") == 0, 5);
-	cout << domTree.getRoot().getChildren().at(0).getChildren().at(1).getChildren().at(0).getContent();
+	// Run tests
+	Node html = domTree.getRoot().getChildren().at(0);
+	printResult(html.getTag().compare("HTML") == 0, 1);
+
+	Node title = html.getChildren().at(0).getChildren().at(0);
+	printResult(title.getTag().compare("TITLE") == 0, 2);
+	printResult(title.getContent().compare("Your Title Here") == 0, 3);
+
+	Node body = html.getChildren().at(1);
+	printResult(body.getChildren().at(0).getChildren().at(2).getContent().compare("second") == 0, 4);
+	printResult(body.getChildren().at(0).getContent().compare("third") == 0, 5);
+	cout << body.getChildren().at(0).getContent();
 
 
 	return 0;
