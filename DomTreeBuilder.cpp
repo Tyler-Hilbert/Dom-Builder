@@ -1,44 +1,21 @@
-#include <iostream>
+#include "DomTreeBuilder.h"
+
 #include <string>
 #include <fstream>
 #include <vector>
 #include <limits>
 #include <algorithm>
 #include <stack>
-#include "View.h"
-#include <thread>
-#include <mutex>
-#include "Page.h"
 #include "Node.h"
 #include "DomTree.h"
+#include "FileReader.h"
+#include "DirBuilder.h"
 
 using namespace std; 
 
-
-void parse(string &line, DomTree &domTree, mutex &mutex); // Parses up to tag
-void decodeHTML(string &line); // Decodes the html character entities
-void createGui(DomTree &domTree, mutex &mutex); // Starts the gui thread
-
-
-int main(int argc, const char** argv) {
-	mutex mutex;
-	DomTree domTree;
-	Node root;
-	root.setTag("root");
-	mutex.lock();
-	domTree.setRoot(root);
-	mutex.unlock();
-
-	// Create gui thread
-	thread thread(&createGui, ref(domTree), ref(mutex));
-	thread.detach();
-
-	// Read page
-	Page page;
-	//string in = page.getPage("http://www.internet-guide.co.uk/");
-	string in = page.getPage("http://masonacm.org");
-
-	// Parse the returned page
+// Populates the passed domTree with the html contents from in
+void DomTreeBuilder::populateDomTreeFromString(DomTree &domTree, string &in) {
+	// Parse the page
 	if (in.empty()) {
 		// ToDO: add error handling here
 	} else {
@@ -47,7 +24,7 @@ int main(int argc, const char** argv) {
 		try {
 			do {
 				in = in.substr(tagIndex + 1);
-				parse(in, domTree, mutex);
+				parse(in, domTree);
 				tagIndex = in.find_first_of('<');
 			} while (tagIndex != -1);
 		}
@@ -55,15 +32,12 @@ int main(int argc, const char** argv) {
 			// TODO:: Improve handling
 		}
 	}
-
-	system("pause");
-	return 0;
 }
 
 /**
  *  Parses the line string and adds it to the parsed string
  */
-void parse(string &in, DomTree &domTree, mutex &mutex) {
+void DomTreeBuilder::parse(string &in, DomTree &domTree) {
 	// Get tag
 	string tag;
 	int endTagIndex = in.find_first_of('>');
@@ -77,9 +51,7 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 	// Check if opening or closing tag
 	if (in.at(0) == '/'){
 		tag = tag.substr(1);
-		mutex.lock();
 		domTree.closeNode(tag);
-		mutex.unlock();
 	} else {
 		Node node;
 		node.setTag(tag);
@@ -91,9 +63,7 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 			decodeHTML(content);
 			node.setContent(content);
 		}
-		mutex.lock();
 		domTree.addNode(node);
-		mutex.unlock();
 	}
 
 	in = in.substr(endTagIndex);
@@ -103,7 +73,7 @@ void parse(string &in, DomTree &domTree, mutex &mutex) {
 /**
   * Decodes any character entities
   */
-void decodeHTML(string &line) {
+void DomTreeBuilder::decodeHTML(string &line) {
 	int tagIndex = line.find_first_of('&');
 	while (tagIndex != -1) {
 		if (line.substr(tagIndex, 5).compare("&amp;") == 0) { // Verfiy this is correct
@@ -129,13 +99,4 @@ void decodeHTML(string &line) {
 		line.erase(index, 2);
 	}
 }
-
-/**
-  * Creates the view, should be called as a thread
-  */
-void createGui(DomTree &domTree, mutex &mutex) {
-	// Display View
-	View view(domTree, mutex);
-}
-
 
